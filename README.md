@@ -1,7 +1,7 @@
-# Ordinary Template
+# Ordinary Command
 
 ## Getting Started
 Install using composer.
 ```shell
-composer require ordinary/template
+composer require ordinary/command
 ```
