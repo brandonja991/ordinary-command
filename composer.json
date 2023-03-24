@@ -1,7 +1,7 @@
 {
-  "name": "ordinary/template",
-  "description": "Template for ordinary/* libraries.",
-  "keywords": ["keyword1", "keyword2"],
+  "name": "ordinary/command",
+  "description": "Library used to normalize the structure of files, functions, and classes intended to be ran from a shell.",
+  "keywords": ["command", "command-interface", "cli", "cli-tools"],
   "type": "library",
   "license": "MIT",
   "authors": [
