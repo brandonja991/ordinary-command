@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<ruleset name="Ordinary Coding Style">
+    <!-- display progress -->
+    <arg value="p" />
+    <!-- Colorful output -->
+    <arg name="colors"/>
+    <!-- Only PHP files -->
+    <arg name="extensions" value="php"/>
+
+    <!-- Rules -->
+    <rule ref="Ordinary" />
+
+    <!-- Check src and tests directories -->
+    <file>src</file>
+    <file>tests</file>
+</ruleset>
