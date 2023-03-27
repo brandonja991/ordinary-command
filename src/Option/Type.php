@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Ordinary\Command\Option;
 
-enum OptionType: string
+enum Type: string
 {
     case Short = '-';
 

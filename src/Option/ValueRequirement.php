@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Ordinary\Command\Option;
 
-enum OptionValueRequirement: string
+enum ValueRequirement: string
 {
     case Optional = '::';
 
