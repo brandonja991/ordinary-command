@@ -27,12 +27,12 @@
   },
   "autoload": {
     "psr-4": {
-      "Ordinary\\Template\\": "src"
+      "Ordinary\\Command\\": "src"
     }
   },
   "autoload-dev": {
     "psr-4": {
-      "Ordinary\\Template\\": "tests"
+      "Ordinary\\Command\\": "tests"
     }
   },
   "config": {
