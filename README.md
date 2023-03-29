@@ -42,7 +42,10 @@ $exec = new CommandExec();
 /** @var Command $cmd */
 $cmd = new MyCommand();
 
-exit($exec->execute($cmd->withArgs($_SERVER['argv'])));
+exit($exec->execute(
+    $cmd->withArgs($_SERVER['argv'])
+        ->withStreams(STDIN, STDOUT, STDERR)
+));
 ```
 
 Run the file
