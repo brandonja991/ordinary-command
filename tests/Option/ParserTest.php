@@ -367,22 +367,7 @@ class ParserTest extends TestCase
         array $expectedItems,
     ): void {
         $parser = new Parser($shortOpts, $longOpts);
-        $iterator = $parser->parse($args);
-        $iterator->rewind();
-
-        foreach ($expectedItems as [$name, $value]) {
-            self::assertTrue($iterator->valid());
-
-            if ($name !== null) {
-                self::assertSame($name, $iterator->key());
-            }
-
-            self::assertSame($value, $iterator->current());
-
-            $iterator->next();
-        }
-
-        self::assertFalse($iterator->valid());
+        self::assertExpectedItems($expectedItems, $parser->parse($args));
     }
 
     /**
@@ -405,22 +390,7 @@ class ParserTest extends TestCase
     {
         $parser = new Parser('fb:z::', ['foo', 'bar:', 'baz::']);
         $parser->optsOnlyAtStart = $optsOnlyAtStart;
-        $iterator = $parser->parse($args);
-        $iterator->rewind();
-
-        foreach ($expectedItems as [$name, $value]) {
-            self::assertTrue($iterator->valid());
-
-            if ($name !== null) {
-                self::assertSame($name, $iterator->key());
-            }
-
-            self::assertSame($value, $iterator->current());
-
-            $iterator->next();
-        }
-
-        self::assertFalse($iterator->valid());
+        self::assertExpectedItems($expectedItems, $parser->parse($args));
     }
 
     /**
