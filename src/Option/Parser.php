@@ -104,6 +104,10 @@ class Parser
                 default => $inlineValue,
             };
 
+            if ($inlineValue) {
+                $i = $argNoPrefixLength;
+            }
+
             if ($definition->valueRequirement === ValueRequirement::Required && $actualValue === null) {
                 $argIndex++;
                 $i = $argNoPrefixLength; // set to end of short args if not already
