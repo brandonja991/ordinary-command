@@ -87,7 +87,7 @@ trait OptionAndArgAccess
         $this->options = [];
         $this->args = [];
 
-        foreach ($parser->parse($this->rawArgs()) as $option => $value) {
+        foreach ($parser->parse(array_slice($this->rawArgs(), 1)) as $option => $value) {
             if (is_int($option)) {
                 $this->args[] = $value;
 
