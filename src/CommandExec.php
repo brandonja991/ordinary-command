@@ -10,11 +10,13 @@ class CommandExec
     public array $helpOptions = ['h', 'help'];
 
     /** @var string[] */
-    public array $args = [];
+    public ?array $args = null;
 
     public function execute(Command $cmd): int
     {
-        $cmd = $cmd->withArgs($this->args);
+        if ($this->args !== null) {
+            $cmd = $cmd->withArgs($this->args);
+        }
 
         $beforeExecute = $cmd->beforeExecute();
 
