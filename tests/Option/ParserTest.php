@@ -5,10 +5,69 @@ declare(strict_types=1);
 namespace Ordinary\Command\Option;
 
 use Generator;
+use Iterator;
 use PHPUnit\Framework\TestCase;
 
 class ParserTest extends TestCase
 {
+    /** @param iterable<array{?string, string}> $expectedItems */
+    public static function assertExpectedItems(iterable $expectedItems, Iterator $iterator): void
+    {
+        $iterator->rewind();
+
+        foreach ($expectedItems as [$name, $value]) {
+            self::assertTrue($iterator->valid());
+
+            if ($name !== null) {
+                self::assertSame($name, $iterator->key());
+            }
+
+            self::assertSame($value, $iterator->current());
+
+            $iterator->next();
+        }
+
+        self::assertFalse($iterator->valid());
+    }
+
+    public static function duplicateOptionsProvider(): Generator
+    {
+        yield [
+            ['-fff'],
+            [['f', false], ['f', false], ['f', false]],
+        ];
+
+        yield [
+            ['-f', '-f', '-f'],
+            [['f', false], ['f', false], ['f', false]],
+        ];
+
+        yield [
+            ['--foo', '--foo', '--foo'],
+            [['foo', false], ['foo', false], ['foo', false]],
+        ];
+
+        yield [
+            ['-bb1', '-b=b2', '-b', 'b3'],
+            [['b', 'b1'], ['b', 'b2'], ['b', 'b3']],
+        ];
+
+        yield [
+            ['--bar=bar1', '--bar', 'bar2'],
+            [['bar', 'bar1'], ['bar', 'bar2']],
+        ];
+
+        yield [
+            ['-z', '-zz2', '-z=z3'],
+            [['z', false], ['z', 'z2'], ['z', 'z3']],
+        ];
+
+        yield [
+            ['--baz', '--baz=baz2'],
+            [['baz', false], ['baz', 'baz2']],
+        ];
+    }
+
     public static function parseArgsOnlyProvider(): Generator
     {
         yield [[], []];
@@ -362,5 +421,16 @@ class ParserTest extends TestCase
         }
 
         self::assertFalse($iterator->valid());
+    }
+
+    /**
+     * @param string[] $args
+     * @param array<array{?string, string}> $expectedItems
+     * @dataProvider duplicateOptionsProvider
+     */
+    public function testDuplicateOptions(array $args, array $expectedItems): void
+    {
+        $parser = new Parser('fb:z::', ['foo', 'bar:', 'baz::']);
+        self::assertExpectedItems($expectedItems, $parser->parse($args));
     }
 }
