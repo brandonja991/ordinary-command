@@ -11,10 +11,10 @@ class OptionAndArgAccessTest extends TestCase
 {
     public static function withArgsProvider(): Generator
     {
-        yield [['foo'], [], ['foo']];
+        yield [['cmd', 'foo'], [], ['foo']];
 
         yield [
-            ['-f', '-b', 'b1', '-zz1', '--foo', '--bar', 'bar1', '--baz=baz1', 'foo'],
+            ['cmd', '-f', '-b', 'b1', '-zz1', '--foo', '--bar', 'bar1', '--baz=baz1', 'foo'],
             [
                 'f' => false,
                 'b' => 'b1',
@@ -28,6 +28,7 @@ class OptionAndArgAccessTest extends TestCase
 
         yield [
             [
+                'cmd',
                 '-f', '-f',
                 '-b', 'b1', '-bb2', '-b=b3',
                 '-zz2', '-z=z3', '-z',
