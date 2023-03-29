@@ -66,7 +66,7 @@ trait StreamHandling
         return $this->stderr;
     }
 
-    /** @return resource */
+    /** @return ?resource */
     private static function validateStream(mixed $stream): mixed
     {
         if ($stream === null) {
