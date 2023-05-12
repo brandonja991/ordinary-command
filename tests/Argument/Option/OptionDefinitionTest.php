@@ -125,4 +125,18 @@ class OptionDefinitionTest extends TestCase
         self::assertSame(['a', 'b:::', 'c:::'], OptionDefinition::splitShortOpts('ab:::c:::'));
         self::assertSame(['a:::', 'b', 'c:::'], OptionDefinition::splitShortOpts('a:::bc:::'));
     }
+
+    public function testMakeSummary(): void
+    {
+        $result = OptionDefinition::makeSummary([
+            new OptionDefinition('foo', ValueRequirement::None, ['f'], 'Foo description'),
+            new OptionDefinition('bar', ValueRequirement::None, description: 'Bar description'),
+        ]);
+        $expected = <<<'SUMMARY'
+  --foo, -f    Foo description
+  --bar        Bar description
+SUMMARY;
+
+        self::assertSame($expected, $result);
+    }
 }

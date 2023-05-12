@@ -64,4 +64,37 @@ final class OptionDefinition
     {
         return $shortOpts === '' ? [] : preg_split('/(?<=.)(?=[^:])/', $shortOpts);
     }
+
+    /** @param OptionDefinition[] $definitions */
+    public static function makeSummary(array $definitions, int $indent = 2): string
+    {
+        if (!$definitions) {
+            return '';
+        }
+
+        $table = [];
+
+        foreach ($definitions as $definition) {
+            $prefix = $definition->type->prefix();
+            $optArg = $prefix . $definition->name;
+            $aliases = array_map(
+                static fn (string $name) => OptionType::fromName($name)->prefix() . $name,
+                $definition->aliases,
+            );
+
+            $table[] = [
+                str_repeat(' ', $indent) . implode(', ', [$optArg, ...$aliases]),
+                $definition->description,
+            ];
+        }
+
+        $padLength = max(array_map(strlen(...), array_column($table, 0)));
+
+        $lines = array_map(
+            static fn (array $row) => implode('    ', [str_pad($row[0], $padLength), $row[1]]),
+            $table,
+        );
+
+        return implode("\n", $lines);
+    }
 }
