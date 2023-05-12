@@ -2,7 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Ordinary\Command\Option;
+namespace Ordinary\Command\Argument\Option;
+
+use Ordinary\Command\UnexpectedValueException;
 
 enum ValueRequirement: string
 {
@@ -12,7 +14,7 @@ enum ValueRequirement: string
 
     case None = '';
 
-    public static function fromOptionDefinition(string $definition): self
+    public static function fromDefinitionString(string $definition): self
     {
         return match (true) {
             str_ends_with($definition, '::') => self::Optional,
@@ -23,6 +25,10 @@ enum ValueRequirement: string
 
     public function extractName(string $definition): string
     {
+        if (!str_ends_with($definition, $this->value)) {
+            throw new UnexpectedValueException('Failed to extract name from option definition string');
+        }
+
         return match ($this) {
             self::Optional => substr($definition, 0, -2),
             self::Required => substr($definition, 0, -1),
