@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Ordinary\Command;
 
 use Ordinary\Command\Argument\OptArgParser;
+use Ordinary\Command\Argument\Option\OptionDefinition;
 use Ordinary\Command\Argument\Option\OptionRepository;
 
 trait OptionAndArgAccess
@@ -50,10 +51,19 @@ trait OptionAndArgAccess
         return $new;
     }
 
+    /** @return OptionDefinition[] */
+    public function buildOptions(): array
+    {
+        return [];
+    }
+
     /** @param string[] $rawArgs */
     protected function parseOptions(array $rawArgs): void
     {
-        $parser = OptArgParser::fromDefinition($this->shortOps, $this->longOpts);
+        $builtOptions = $this->buildOptions();
+        $parser = $builtOptions
+            ? OptArgParser::fromOptions($builtOptions)
+            : OptArgParser::fromDefinition($this->shortOps, $this->longOpts);
         [$this->args, $this->options] = $parser->parse($rawArgs);
     }
 }

@@ -4,10 +4,46 @@ declare(strict_types=1);
 
 namespace Ordinary\Command;
 
+use Ordinary\Command\Argument\Option\OptionDefinition;
+use Ordinary\Command\Argument\Option\ValueRequirement;
 use PHPUnit\Framework\TestCase;
 
 class OptionAndArgAccessTest extends TestCase
 {
+    public function testBuildOptions(): void
+    {
+        $args = ['cmd', '--foo', '--help', 'baz'];
+        $obj = new class ($args) {
+            use OptionAndArgAccess {
+                buildOptions as buildOptionsOriginal;
+            }
+
+            /** @param string[] $args */
+            public function __construct(array $args)
+            {
+                $this->shortOps = 'f';
+                $this->longOpts = ['foo'];
+                $this->parseOptions($args);
+            }
+
+            /** @return OptionDefinition[] */
+            public function buildOptions(): array
+            {
+                return [
+                    new OptionDefinition('help', ValueRequirement::None, ['h']),
+                ];
+            }
+        };
+
+        self::assertTrue($obj->options()->exists('help'));
+        self::assertFalse($obj->options()->exists('foo'));
+
+        $b = $obj->withArgs(['cmd', '--foo', '-h', 'baz']);
+
+        self::assertTrue($b->options()->exists('help'));
+        self::assertFalse($b->options()->exists('foo'));
+    }
+
     public function testWithArgs(): void
     {
         $argSet1 = ['cmd', 'foo', 'bar'];
