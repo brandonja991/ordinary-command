@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace Ordinary\Command;
 
-use Ordinary\Command\Option\Parser;
+use Ordinary\Command\Argument\OptArgParser;
+use Ordinary\Command\Argument\Option\OptionRepository;
 
 trait OptionAndArgAccess
 {
@@ -13,26 +14,16 @@ trait OptionAndArgAccess
     /** @var string[] */
     protected array $longOpts = [];
 
-    protected bool $optionsOnlyAtStart = true;
-
-    /** @var array<string, string|array|false> */
-    private array $options = [];
+    private ?OptionRepository $options = null;
 
     /** @var string[] */
     private array $args = [];
 
-    /** @var string[] */
-    private array $rawArgs = [];
-
-    /** @return array<string, string|array|false> */
-    final public function options(): array
+    final public function options(): OptionRepository
     {
+        $this->options ??= OptionRepository::create();
+
         return $this->options;
-    }
-
-    final public function option(string|int $name): string|false|array|null
-    {
-        return $this->options[$name] ?? null;
     }
 
     /**
@@ -45,66 +36,24 @@ trait OptionAndArgAccess
         return $this->args;
     }
 
-    /** Get args re-indexed after options extracted */
-    final public function arg(int $index): ?string
+    final public function scriptName(): string
     {
-        return $this->args[$index] ?? null;
+        return $this->args[0] ?? '';
     }
 
-    /**
-     * Get args indexed in original state before options parsed and extracted.
-     *
-     * @return string[]
-     */
-    final public function rawArgs(): array
-    {
-        return $this->rawArgs;
-    }
-
-    /**
-     * Get arg indexed in original state before options parsed and extracted.
-     */
-    final public function rawArg(int $index): ?string
-    {
-        return $this->rawArgs[$index] ?? null;
-    }
-
-    /** @param string[] $args */
-    public function withArgs(array $args): static
+    /** @param string[] $rawArgs */
+    public function withArgs(array $rawArgs): static
     {
         $new = clone $this;
-        $new->rawArgs = $args;
-        $new->parseOptions();
+        $new->parseOptions($rawArgs);
 
         return $new;
     }
 
-    protected function parseOptions(): void
+    /** @param string[] $rawArgs */
+    protected function parseOptions(array $rawArgs): void
     {
-        $parser = new Parser($this->shortOps, $this->longOpts);
-        $parser->optsOnlyAtStart = $this->optionsOnlyAtStart;
-
-        $this->options = [];
-        $this->args = [];
-
-        foreach ($parser->parse(array_slice($this->rawArgs(), 1)) as $option => $value) {
-            if (is_int($option)) {
-                $this->args[] = $value;
-
-                continue;
-            }
-
-            if (isset($this->options[$option])) {
-                if (!is_array($this->options[$option])) {
-                    $this->options[$option] = [$this->options[$option]];
-                }
-
-                $this->options[$option][] = $value;
-
-                continue;
-            }
-
-            $this->options[$option] = $value;
-        }
+        $parser = OptArgParser::fromDefinition($this->shortOps, $this->longOpts);
+        [$this->args, $this->options] = $parser->parse($rawArgs);
     }
 }

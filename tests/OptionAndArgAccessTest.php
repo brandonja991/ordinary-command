@@ -4,85 +4,60 @@ declare(strict_types=1);
 
 namespace Ordinary\Command;
 
-use Generator;
 use PHPUnit\Framework\TestCase;
 
 class OptionAndArgAccessTest extends TestCase
 {
-    public static function withArgsProvider(): Generator
+    public function testWithArgs(): void
     {
-        yield [['cmd', 'foo'], [], ['foo']];
-
-        yield [
-            ['cmd', '-f', '-b', 'b1', '-zz1', '--foo', '--bar', 'bar1', '--baz=baz1', 'foo'],
-            [
-                'f' => false,
-                'b' => 'b1',
-                'z' => 'z1',
-                'foo' => false,
-                'bar' => 'bar1',
-                'baz' => 'baz1',
-            ],
-            ['foo'],
-        ];
-
-        yield [
-            [
-                'cmd',
-                '-f', '-f',
-                '-b', 'b1', '-bb2', '-b=b3',
-                '-zz2', '-z=z3', '-z',
-                '--foo', '--foo',
-                '--bar', 'bar2', '--bar=bar3',
-                '--baz=baz1', '--baz',
-                'foo', 'bar', 'baz',
-            ],
-            [
-                'f' => [false, false],
-                'b' => ['b1', 'b2', 'b3'],
-                'z' => ['z2', 'z3', false],
-                'foo' => [false, false],
-                'bar' => ['bar2', 'bar3'],
-                'baz' => ['baz1', false],
-            ],
-            ['foo', 'bar', 'baz'],
-        ];
-    }
-
-    /**
-     * @param string[] $args
-     * @param array<string, string[]|string> $expectedOptions
-     * @param string[] $expectedArgs
-     * @dataProvider withArgsProvider
-     */
-    public function testWithArgs(array $args, array $expectedOptions, array $expectedArgs): void
-    {
-        $obj = new class () {
+        $argSet1 = ['cmd', 'foo', 'bar'];
+        $obj = new class ($argSet1) {
             use OptionAndArgAccess;
 
-            public function __construct()
+            /** @param string[] $argSet1 */
+            public function __construct(array $argSet1)
             {
                 $this->shortOps = 'fb:z::';
                 $this->longOpts = ['foo', 'bar:', 'baz::'];
+                $this->parseOptions($argSet1);
             }
         };
 
-        $a = $obj->withArgs($args);
+        self::assertSame($argSet1, $obj->args());
+        self::assertSame([], $obj->options()->all());
+        self::assertSame('cmd', $obj->scriptName());
 
-        self::assertSame($args, $a->rawArgs());
-        self::assertEquals($expectedOptions, $a->options());
-        self::assertSame($expectedArgs, $a->args());
+        $a = $obj->withArgs($argSet1);
+        self::assertNotSame($obj, $a);
+        self::assertNotSame($obj->options(), $a->options());
+        self::assertSame($obj->args(), $a->args());
+        self::assertSame($obj->options()->all(), $a->options()->all());
+        self::assertSame($obj->scriptName(), $a->scriptName());
 
-        foreach ($expectedOptions as $opt => $optValue) {
-            self::assertSame($optValue, $a->option($opt));
-        }
+        $argSet2 = [
+            'cmd2',
+            '-f', '-f',
+            '-b', 'b1', '-bb2', '-b=b3',
+            '-zz2', '-z=z3', '-z',
+            '--foo', '--foo',
+            '--bar', 'bar2', '--bar=bar3',
+            '--baz=baz1', '--baz',
+            'foo', 'bar', 'baz',
+        ];
 
-        foreach ($expectedArgs as $argI => $argV) {
-            self::assertSame($argV, $a->arg($argI));
-        }
+        $b = $a->withArgs($argSet2);
+        self::assertNotSame($a, $b);
+        self::assertNotSame($a->options(), $optionsB = $b->options());
+        self::assertSame('cmd2', $b->scriptName());
 
-        foreach ($args as $rawArgI => $rawArgV) {
-            self::assertSame($rawArgV, $a->rawArg($rawArgI));
-        }
+        self::assertSame([false, false], $optionsB->getArray('f'));
+        self::assertSame(['b1', 'b2', 'b3'], $optionsB->getArray('b'));
+        self::assertSame(['z2', 'z3', false], $optionsB->getArray('z'));
+
+        self::assertSame([false, false], $optionsB->getArray('foo'));
+        self::assertSame(['bar2', 'bar3'], $optionsB->getArray('bar'));
+        self::assertSame(['baz1', false], $optionsB->getArray('baz'));
+
+        self::assertSame(['cmd2', 'foo', 'bar', 'baz'], $b->Args());
     }
 }
