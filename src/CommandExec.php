@@ -6,8 +6,7 @@ namespace Ordinary\Command;
 
 class CommandExec
 {
-    /** @var string[] */
-    public array $helpOptions = ['h', 'help'];
+    public string $helpOption = 'help';
 
     /** @var string[] */
     public ?array $args = null;
@@ -24,7 +23,7 @@ class CommandExec
             return $beforeExecute;
         }
 
-        if (array_intersect_key($cmd->options(), array_flip($this->helpOptions))) {
+        if ($this->helpOption !== '' && $cmd->options()->exists($this->helpOption)) {
             $cmd->showHelp();
 
             return 0;
