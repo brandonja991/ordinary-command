@@ -66,6 +66,16 @@ trait StreamHandling
         return $this->stderr;
     }
 
+    protected function printErr(string $message, bool $withNewLine = true): void
+    {
+        fwrite($this->stderr(), $message . ($withNewLine ? "\n" : ''));
+    }
+
+    protected function printOut(string $message, bool $withNewLine = true): void
+    {
+        fwrite($this->stdout(), $message . ($withNewLine ? "\n" : ''));
+    }
+
     /** @return ?resource */
     private static function validateStream(mixed $stream): mixed
     {
